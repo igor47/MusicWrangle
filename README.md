@@ -24,3 +24,14 @@ retag.py
 -------
 
 This is a little python program that walks down the music archive and re-tags files based on filename.
+
+genmediaownership
+----------------
+
+changes ownership of files and directories to be accessible by multiple users
+
+genmediaindex
+------------
+
+generates the master music index file because it takes forever for apache to do it
+this also generates a `recent.html` file containing a list of recently-updated directories

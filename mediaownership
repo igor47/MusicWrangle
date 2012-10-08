@@ -1,0 +1,12 @@
+#!/bin/bash
+
+chown -R :media /media
+chmod -R ug=rwX,o=rX /media
+
+#lowercase all filenames
+find /media/music -depth -regex '.*[A-Z].*' -exec rename 's/(.*)\/([^\/]*)/$1\/\L$2/' {} \;
+find /media/movies -depth -regex '.*[A-Z].*' -exec rename 's/(.*)\/([^\/]*)/$1\/\L$2/' {} \;
+
+#make all directories
+find /media -type d -exec chmod g+s \{\} \;
+find /media -type f -exec chmod a-x \{\} \;
