@@ -1,0 +1,86 @@
+#!/usr/bin/python
+
+import os, commands,datetime
+
+idxFile = open('/media/music/index.html','w')
+idxFile.write("""
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>Index of /media/music</title>
+</head>
+<body>
+<h1>Index of /media/music/</h1>
+<h3><a href="/music/recent.html">recently added</a></h3>
+<pre>""")
+
+def mycmp(first, second):
+	return cmp(first['mtime'], second['mtime'])
+
+mostrecent = []
+level1= []
+
+status, output = commands.getstatusoutput('find /media/music -type d -not -name *.html')
+for dir in output.split('\n'):
+	parts = dir.split('/')
+	mtime = os.path.getmtime(dir)
+	
+	if len(parts) == 4:
+		level1.append(parts[3])
+
+	if len(parts) == 3:
+		continue
+
+	mostrecent.append({'mtime':mtime, 'parts':parts, 'dir':dir})
+
+level1.sort()
+line = """<img src="/icons/folder.gif" alt="[DIR]"> <a href="%s">%s</a>\n"""
+for dir in level1:
+	idxFile.write(line % (dir, dir))
+
+idxFile.write("""
+<hr></pre>
+</body></html>""")
+idxFile.close()
+
+recentFile = open('/media/music/recent.html', 'w')
+recentFile.write("""
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+	<head>
+		<title>Most Recent Directories</title>
+	</head>
+	<body>
+		<h1>Recently modified directories</h1>
+		<pre>""")
+
+mostrecent.sort(mycmp)
+mostrecent.reverse()
+
+#lets avoid putting both dir and it's parent in here; they should be adjecent, so lets use that
+sansparents = [mostrecent[0]]
+for item in mostrecent[1:]:
+	common = os.path.commonprefix( (sansparents[-1]['dir'], item['dir']) )
+	if common == item['dir']:
+		continue
+	elif common == sansparents[-1]['dir']:
+		sansparents[-1] = item
+	else:
+		sansparents.append(item)
+
+	if len(sansparents) > 30:
+		break;
+
+mostrecent = sansparents
+
+line = """<a href="/%s">%s</a> (Modified %s)\n"""
+for recent in mostrecent:
+	epath = "/".join(recent['parts'][2:])
+	recentFile.write(line % (epath,epath,datetime.datetime.fromtimestamp(recent['mtime']).ctime()))
+
+recentFile.write("""
+		<hr>
+		</pre>
+	</body>
+</html>""")
+recentFile.close()
