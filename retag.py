@@ -35,7 +35,7 @@ for dirpath, dirnames, filenames in os.walk('/media/music'):
 
       elif mfile.endswith('ogg'):
          try:
-            t = mutagen.oggvorbis.open(path)
+            t = mutagen.oggvorbis.Open(path)
          except:
             continue
          else:
