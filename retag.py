@@ -81,7 +81,9 @@ def walk_media(root):
             if value is None:
                continue
 
-            # is the value already set? if so we don't update it, but we do log disagreements
+            should_update_field = False
+
+            # if the field is not currently set, we should definitely update
             try:
                existing_value = ft.tags[field]
 
@@ -91,6 +93,28 @@ def walk_media(root):
                except IndexError:
                   pass
 
+               # get rid of extra whitespace
+               try:
+                  existing_value = existing_value.strip()
+               except AttributeError:
+                  pass
+            except KeyError:
+               should_update_field = True
+
+            # if the current field is empty, we should set it
+            try:
+               if len(existing_value) == 0:
+                  should_update_field = True
+            except TypeError:
+               pass
+
+            # if we should be updating, lets do it
+            if should_update_field:
+               ft.tags[field] = [value]
+               updated_fields[field] = value
+
+            # if we are not updating, lets keep track of field values where we disagree
+            else:
                if field == 'tracknumber':
                   try:
                      existing_value = int(existing_value)
