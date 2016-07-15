@@ -95,18 +95,24 @@ def walk_media(root):
                   try:
                      existing_value = int(existing_value)
                   except ValueError:
-                     pass
+                     try:
+                        existing_value = int(existing_value.split('/')[0])
+                     except ValueError:
+                        pass
 
                   if existing_value != int(value):
                      disagreed_fields[field] = (existing_value, value)
-               elif existing_value != value:
-                  disagreed_fields[field] = (existing_value, value)
+               else:
+                  possible_values = [existing_value]
+                  try:
+                     possible_values.append(existing_value.lower())
+                  except AttributeError:
+                     pass
 
-            # value is not already set, so lets use the value we've got
-            except KeyError:
-               ft.tags[field] = [value]
-               updated_fields[field] = value
+                  if value not in possible_values:
+                     disagreed_fields[field] = (existing_value, value)
 
+         # we definitely want to save if we have updated fields
          if len(updated_fields) > 0:
             print "%-30s: updated: %s" % (path, updated_fields)
             ft.save()
