@@ -115,9 +115,15 @@ def walk_media(root):
          # we definitely want to save if we have updated fields
          if len(updated_fields) > 0:
             print "%-30s: updated: %s" % (path, updated_fields)
-            ft.save()
+
+            try:
+               ft.save(v1=mutagen.id3.ID3v1SaveOptions.REMOVE)
+            except TypeError:
+               ft.save()
+
+         # if we do not have updated fields, we may still want to delete v1 tags
          else:
-            print "%-30s: up2date!" % path
+            mutagen.id3.ID3().delete(ft.filename, delete_v1 = True, delete_v2 = False)
 
          if len(disagreed_fields) > 0:
             print "%-30s: disagreed: %s" % (path, disagreed_fields)
